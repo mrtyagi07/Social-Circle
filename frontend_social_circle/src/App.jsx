@@ -1,10 +1,22 @@
 import React from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import Login from "./components/Login";
+import Home from "./container/Home";
 
 const App = () => {
   return (
-    <div>
-      <h1 className="bg-rose-600 text-lg underline">Hi! I am Vaibhav!</h1>
-    </div>
+    <Routes>
+      <Route
+        path="login"
+        element={
+          <GoogleOAuthProvider>
+            <Login />
+          </GoogleOAuthProvider>
+        }
+      />
+      <Route path="/*" element={<Home />} />
+    </Routes>
   );
 };
 
