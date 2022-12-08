@@ -1,16 +1,33 @@
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
-
+import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import jwt_decode from "jwt-decode";
 //import shareVideo from "../assets/share.MP4";
 import shareVideo1 from "../assets/share 2.mp4";
 import shareVideo2 from "../assets/share3.mp4";
 import logo from "../assets/logo.png";
+import { client } from "../client";
+//import { createOrGetUser } from "../utils";
 
 const Login = () => {
-  const responseGoogle = (response) => {
-    console.log(response);
+  const navigate = useNavigate();
+
+  const createOrGetUser = (response) => {
+    const decoded = jwt_decode(response.credential);
+    console.log(decoded);
+    const { name, sub, picture } = decoded;
+
+    const doc = {
+      _id: sub,
+      _type: "user",
+      userName: name,
+      image: picture,
+    };
+    client.createIfNotExists(doc).then(() => {
+      navigate("/", { replace: true });
+    });
   };
 
   return (
@@ -33,19 +50,17 @@ const Login = () => {
 
           <div className="absolute top-7 right-7 ">
             <GoogleLogin
-              clientId={process.env.REACT_APP_GOOGLE_API_TOKEN}
-              render={(renderProps) => (
-                <button
-                  type="button"
-                  className=" flex cursor-pointer items-center justify-center rounded-lg bg-slate-100 p-3 outline-none"
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                >
-                  <FcGoogle className="mr-4" /> Sign in with google
-                </button>
-              )}
-              onSuccess={responseGoogle}
-              onError={responseGoogle}
+              onSuccess={(response) => {
+                createOrGetUser(response);
+              }}
+              onError={() => {
+                console.log("Login Failed");
+              }}
+              useOneTap
+              auto_select={true}
+              shape={"square"}
+              theme={"filled_black"}
+              size={"medium"}
             />
           </div>
         </div>

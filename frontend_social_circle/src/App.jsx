@@ -10,7 +10,9 @@ const App = () => {
       <Route
         path="login"
         element={
-          <GoogleOAuthProvider>
+          <GoogleOAuthProvider
+            clientId={import.meta.env.VITE_APP_GOOGLE_API_TOKEN}
+          >
             <Login />
           </GoogleOAuthProvider>
         }
