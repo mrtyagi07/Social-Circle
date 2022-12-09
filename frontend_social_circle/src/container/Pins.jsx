@@ -1,7 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 
-const Pins = () => {
-  return <div>Pins</div>;
+import { Navbar, Feed, PinDetails, CreatePin, Search } from "../components";
+
+const Pins = ({ user }) => {
+  const [searchTerm, setSerachTerm] = useState("");
+  return (
+    <div className="px-2 md:px-5">
+      <div className="bg-gray-50">
+        <Navbar
+          searchTerm={searchTerm}
+          setSerachTerm={setSerachTerm}
+          user={user}
+        />
+      </div>
+      <div className="h-full">
+        <Routes>
+          <Route path="/" element={<Feed />} />
+          <Route path="/category/:categoryId" element={<Feed />} />
+          <Route
+            path="/pin-detail/pinId"
+            element={<PinDetails user={user} />}
+          />
+          <Route path="/create-pin" element={<CreatePin user={user} />} />
+          <Route
+            path="/search"
+            element={
+              <Search searchTerm={searchTerm} setSerachTerm={setSerachTerm} />
+            }
+          />
+        </Routes>
+      </div>
+    </div>
+  );
 };
 
 export default Pins;
