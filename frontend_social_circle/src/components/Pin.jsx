@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { MdDownloadForOffline } from "react-icons/md";
@@ -6,19 +6,34 @@ import { AiTwotoneDelete } from "react-icons/ai";
 import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 
 import { client, urlFor } from "../client";
-import { useState } from "react";
-import { fetchUser } from "../utils/fetchUser";
 
-const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
+const Pin = ({ pin }) => {
   const [postHovered, setPostHovered] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
+
   const navigate = useNavigate();
-  const user = fetchUser();
-  const alreadySaved = !save?.filter((item) => item.postedBy._id === user.sub)
-    ?.length;
+
+  const { postedBy, image, _id, destination } = pin;
+
+  const user =
+    localStorage.getItem("user") !== "undefined"
+      ? JSON.parse(localStorage.getItem("user"))
+      : localStorage.clear();
+
+  const deletePin = (id) => {
+    client.delete(id).then(() => {
+      window.location.reload();
+    });
+  };
+
+  let alreadySaved = pin?.save?.filter(
+    (item) => item?.postedBy?._id === user?.sub,
+  );
+
+  alreadySaved = alreadySaved?.length > 0 ? alreadySaved : [];
 
   const savePin = (id) => {
-    if (!alreadySaved) {
+    if (alreadySaved?.length === 0) {
       setSavingPost(true);
 
       client
@@ -27,21 +42,19 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
         .insert("after", "save[-1]", [
           {
             _key: uuidv4(),
-            userId: user.sub,
+            userId: user?.sub,
             postedBy: {
               _type: "postedBy",
-              _ref: user.sub,
+              _ref: user?.sub,
             },
           },
         ])
         .commit()
         .then(() => {
-          window.location.reload(), setSavingPost(false);
+          window.location.reload();
+          setSavingPost(false);
         });
     }
-  };
-  const deletePin = (id) => {
-    client.delete(id).then(() => window.location.reload());
   };
 
   return (
@@ -50,68 +63,74 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
         onMouseEnter={() => setPostHovered(true)}
         onMouseLeave={() => setPostHovered(false)}
         onClick={() => navigate(`/pin-detail/${_id}`)}
-        className="relative w-auto cursor-zoom-in overflow-hidden rounded-lg transition-all duration-500 ease-in-out hover:shadow-lg"
+        className=" relative w-auto cursor-zoom-in overflow-hidden rounded-lg transition-all duration-500 ease-in-out hover:shadow-lg"
       >
-        <img
-          className="w-full rounded-lg"
-          alt="user-post"
-          src={urlFor(image).width(250).url()}
-        />
+        {image && (
+          <img
+            className="w-full rounded-lg "
+            src={urlFor(image).width(250).url()}
+            alt="user-post"
+          />
+        )}
         {postHovered && (
-          <div className="absolute top-0 z-50 flex h-full w-full flex-col justify-between p-1 pr-2 pt-2 pb-2">
+          <div
+            className="absolute top-0 z-50 flex h-full w-full flex-col justify-between p-1 pr-2 pt-2 pb-2"
+            style={{ height: "100%" }}
+          >
             <div className="flex items-center justify-between">
               <div className="flex gap-2">
                 <a
                   href={`${image?.asset?.url}?dl=`}
                   download
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl text-gray-900 opacity-75 outline-none hover:opacity-100 hover:shadow-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-2 text-xl text-black opacity-75 outline-none hover:opacity-100 hover:shadow-md"
                 >
                   <MdDownloadForOffline />
                 </a>
               </div>
-              {alreadySaved ? (
+              {alreadySaved?.length !== 0 ? (
                 <button
                   type="button"
-                  className="rounded-3xl bg-red-500 px-5 py-1 text-base font-bold text-white opacity-70 outline-none hover:opacity-100 hover:shadow-md"
+                  className="rounded-3xl bg-red-500 px-5 py-1 font-bold text-black text-white opacity-70 outline-none hover:opacity-100 hover:shadow-md"
                 >
-                  {save?.length} Saved
+                  {pin?.save?.length} Saved
                 </button>
               ) : (
                 <button
-                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     savePin(_id);
                   }}
+                  type="button"
                   className="rounded-3xl bg-red-500 px-5 py-1 text-base font-bold text-white opacity-70 outline-none hover:opacity-100 hover:shadow-md"
                 >
-                  save
+                  {pin?.save?.length} {savingPost ? "Saving" : "Save"}
                 </button>
               )}
             </div>
-            <div className="flex w-full items-center justify-between gap-2">
-              {destination && (
+            <div className=" flex w-full items-center justify-between gap-2">
+              {destination?.slice(8).length > 0 ? (
                 <a
                   href={destination}
                   target="_blank"
+                  className="flex items-center gap-2 rounded-full bg-white p-2 pl-4 pr-4 font-bold text-black opacity-70 hover:opacity-100 hover:shadow-md"
                   rel="noreferrer"
-                  className="flex items-center rounded-full bg-white p-2 pl-4 pr-4 font-bold text-black opacity-70 hover:opacity-100 hover:shadow-md"
                 >
+                  {" "}
                   <BsFillArrowUpRightCircleFill />
-                  {destination.length > 20
-                    ? destination.slice(8, 20)
-                    : destination.slice(8)}
+                  {destination?.slice(8, 17)}...
                 </a>
-              )}
-              {postedBy?._id === user.sub && (
+              ) : undefined}
+              {postedBy?._id === user?.sub && (
                 <button
                   type="button"
-                  className="rounded-3xl bg-white p-2  text-base font-bold text-black  opacity-70 outline-none hover:opacity-100 hover:shadow-md"
                   onClick={(e) => {
                     e.stopPropagation();
                     deletePin(_id);
                   }}
+                  className="text-dark flex h-8 w-8 items-center justify-center rounded-full bg-white p-2 opacity-75 outline-none hover:opacity-100"
                 >
                   <AiTwotoneDelete />
                 </button>
@@ -121,7 +140,7 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
         )}
       </div>
       <Link
-        to={`user-profile/${postedBy?._id}`}
+        to={`/user-profile/${postedBy?._id}`}
         className="mt-2 flex items-center gap-2"
       >
         <img
