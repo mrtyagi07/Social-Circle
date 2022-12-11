@@ -58,7 +58,6 @@ const Login = () => {
                 console.log("Login Failed");
               }}
               useOneTap
-              auto_select={true}
               shape={"square"}
               theme={"filled_black"}
               size={"medium"}

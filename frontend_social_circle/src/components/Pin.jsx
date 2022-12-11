@@ -85,7 +85,7 @@ const Pin = ({ pin }) => {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-2 text-xl text-black opacity-75 outline-none hover:opacity-100 hover:shadow-md"
+                  className="text-dark flex h-9 w-9 items-center justify-center rounded-full bg-white p-2 text-xl opacity-75 outline-none hover:opacity-100 hover:shadow-md"
                 >
                   <MdDownloadForOffline />
                 </a>
@@ -93,7 +93,7 @@ const Pin = ({ pin }) => {
               {alreadySaved?.length !== 0 ? (
                 <button
                   type="button"
-                  className="rounded-3xl bg-red-500 px-5 py-1 font-bold text-black text-white opacity-70 outline-none hover:opacity-100 hover:shadow-md"
+                  className="rounded-3xl bg-red-500 px-5 py-1 text-base font-bold text-white opacity-70 outline-none hover:opacity-100 hover:shadow-md"
                 >
                   {pin?.save?.length} Saved
                 </button>
@@ -148,9 +148,7 @@ const Pin = ({ pin }) => {
           src={postedBy?.image}
           alt="user-profile"
         />
-        <p className="font-semibold capitalize text-black">
-          {postedBy?.userName}
-        </p>
+        <p className="font-semibold capitalize">{postedBy?.userName}</p>
       </Link>
     </div>
   );
